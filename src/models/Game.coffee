@@ -5,7 +5,6 @@ class window.Game extends Backbone.Model
     @set
       chips: 100
       betSize: 5
-    @newGame()
 
   playerHit: ->
     if @get('status') is 'player'
