@@ -1,78 +1,70 @@
 class window.Game extends Backbone.Model
-  initialize: (params)->
-
+  initialize: ->
     @set
-      deck: params.deck
-      player: params.player
-      dealer: params.dealer
-      turn: 'player'
       chips: 100
       betSize: 5
-
-    if @get('dealer').isBlackjack() and @get('player').isBlackjack()
-      @get('dealer').at(0).flip()
-      @draw()
-
-
-    if @get('dealer').isBlackjack()
-      @get('dealer').at(0).flip()
-      @lose()
-
-
-    if @get('player').isBlackjack()
-      @win()
-
+    @newGame()
 
   playerHit: ->
-    if @get('turn') == 'player'
-      if @get('player').minScore() < 21
-        @get('player').hit()
-        if @get('player').minScore() > 21
+    if @get('status') is 'player'
+      if @get('playerHand').minScore() < 21
+        @get('playerHand').hit()
+        if @get('playerHand').maxScore() is 21
+          @playerStand()
+        if @get('playerHand').minScore() > 21
           @lose()
 
-
   playerStand: ->
-    if @get('turn') == 'player'
-      @set 'turn', 'dealer'
+    if @get('status') is 'player'
+      @set 'status', 'dealer'
       @dealerStart()
 
   dealerHit: ->
-    @get('dealer').hit()
-    if @get('dealer').minScore() > 21
+    @get('dealerHand').hit()
+    if @get('dealerHand').minScore() > 21
       @win()
 
   dealerStart: ->
-    @get('dealer').at(0).flip()
-    while @get('dealer').maxScore() < 17 + @get('dealer').hasAce()
+    @get('dealerHand').at(0).flip()
+    while @get('dealerHand').maxScore() < 17 + @get('dealerHand').hasAce()
       @dealerHit()
-    if @get('turn') != 'over'
-      playerScore = @get('player').maxScore()
-      dealerScore = @get('dealer').maxScore()
+    if @get('status') is 'dealer'
+      playerScore = @get('playerHand').maxScore()
+      dealerScore = @get('dealerHand').maxScore()
       if playerScore > dealerScore
         @win()
-      else if playerScore == dealerScore
+      else if playerScore is dealerScore
         @draw()
       else @lose()
 
+  newGame: ->
+    if @get('chips') > @get 'betSize'
+      @set
+        deck: new Deck()
+      @set
+        playerHand: @get('deck').dealPlayer()
+        dealerHand: @get('deck').dealDealer()
+        status: 'player'
 
-  win: ->
-    @set 'turn', 'over'
-    button = $ '.newGame'
-    button.show()
-    button.text 'YOU WIN!!!!!'
+      if @get('dealerHand').isBlackjack() and @get('playerHand').isBlackjack()
+        @get('dealerHand').at(0).flip()
+        @draw()
+      else if @get('dealerHand').isBlackjack()
+        @get('dealerHand').at(0).flip()
+        @lose()
+      else if @get('playerHand').isBlackjack()
+        @win(true)
 
+  win: (special) ->
+    @set 'status', 'win'
+    @set 'chips', @get('chips') + (@get 'betSize')*(1+.5*!!special)
+    #console.log @get 'chips' #fixme
 
   lose: ->
-    @set 'turn', 'over'
-    button = $ '.newGame'
-    button.show()
-    button.text 'YOU LOSE :('
+    @set 'status', 'lose'
+    @set 'chips', @get('chips') - @get 'betSize'
+    #console.log @get 'chips' #fixme
 
   draw: ->
-    @set 'turn', 'over'
-    button = $ '.newGame'
-    button.show()
-    button.text 'YOU DRAW ¯\\_(ツ)_/¯'
-
-  newGame: ->
-
+    @set 'status', 'draw'
+    #console.log @get 'chips' #fixme
