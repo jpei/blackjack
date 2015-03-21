@@ -19,7 +19,7 @@ class window.Hand extends Backbone.Collection
     if score[1] <= 21 then score[1] else score[0]
 
   isBlackjack: ->
-    @maxScore() == 21
+    @at(0).get('value') + @at(1).get('value') + 10 * @hasAce() is 21
 
   scores: ->
     # The scores are an array of potential scores.

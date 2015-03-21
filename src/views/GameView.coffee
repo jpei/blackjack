@@ -1,8 +1,10 @@
 class window.GameView extends Backbone.View
   template: _.template '
+    <span class = "chips">Chips: <%=chips%> </span>
     <button class="hit-button">Hit</button>
     <button class="stand-button">Stand</button>
     <%= button %>
+    <div class = "betSize">Bet Size: <%=betSize%></div>
     <div class="player-hand-container"></div>
     <div class="dealer-hand-container"></div>
   '
@@ -21,10 +23,15 @@ class window.GameView extends Backbone.View
     'click .stand-button': -> @model.playerStand()
 
   initialize: ->
+    @model.set 'name', prompt('What is your name?', 'Anonymous') or 'Anonymous'
     @render()
-    @listenTo(@model, 'change:status', @render)
+    @listenTo @model, 'change:status', @render
+    @$el.on 'click', '.newGame', => @model.newGame()
 
   render: ->
-    @$el.html @template button:@newGameText()
-    @$('.player-hand-container').html new HandView(collection: @model.get 'playerHand').el
+    @$el.html @template
+      button:@newGameText()
+      chips:@model.get 'chips'
+      betSize:@model.get 'betSize'
+    @$('.player-hand-container').html new HandView(collection: (@model.get 'playerHand'), name: @model.get 'name').el
     @$('.dealer-hand-container').html new HandView(collection: @model.get 'dealerHand').el
