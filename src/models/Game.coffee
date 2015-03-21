@@ -6,6 +6,8 @@ class window.Game extends Backbone.Model
       player: params.player
       dealer: params.dealer
       turn: 'player'
+      chips: 100
+      betSize: 5
 
     if @get('dealer').isBlackjack() and @get('player').isBlackjack()
       @get('dealer').at(0).flip()
@@ -54,13 +56,23 @@ class window.Game extends Backbone.Model
 
 
   win: ->
-    console.log("YOU WIN")
     @set 'turn', 'over'
+    button = $ '.newGame'
+    button.show()
+    button.text 'YOU WIN!!!!!'
+
 
   lose: ->
-    console.log("YOU LOSE")
     @set 'turn', 'over'
+    button = $ '.newGame'
+    button.show()
+    button.text 'YOU LOSE :('
 
   draw: ->
-    console.log("YOU DRAW")
     @set 'turn', 'over'
+    button = $ '.newGame'
+    button.show()
+    button.text 'YOU DRAW ¯\\_(ツ)_/¯'
+
+  newGame: ->
+

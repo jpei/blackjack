@@ -14,3 +14,7 @@
 .hand {
   overflow: auto;
 }
+
+.newGame {
+  display: none;
+}
