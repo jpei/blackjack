@@ -1,6 +1,8 @@
 class window.Game extends Backbone.Model
   initialize: ->
     @set
+      initChips: 100
+    @set
       chips: 100
       betSize: 5
     @newGame()
@@ -38,7 +40,10 @@ class window.Game extends Backbone.Model
       else @lose()
 
   newGame: ->
-    if @get('chips') > @get 'betSize'
+    if @get('chips') < @get 'betSize'
+      @set 'status', 'bankrupt'
+    else
+      @set 'chips', @get('chips') - @get 'betSize'
       @set
         deck: new Deck()
       @set
@@ -58,15 +63,13 @@ class window.Game extends Backbone.Model
       @win(true)
 
   win: (special) ->
-    @set 'chips', @get('chips') + (@get 'betSize')*(1+.5*!!special)
+    @set 'chips', @get('chips') + (@get 'betSize')*(2+.5*!!special)
     @set 'status', 'win'
-    #console.log @get 'chips' #fixme
 
   lose: ->
-    @set 'chips', @get('chips') - @get 'betSize'
     @set 'status', 'lose'
-    #console.log @get 'chips' #fixme
 
   draw: ->
+    @set 'chips', @get('chips') + @get 'betSize'
     @set 'status', 'draw'
-    #console.log @get 'chips' #fixme
+
