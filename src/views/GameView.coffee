@@ -4,7 +4,7 @@ class window.GameView extends Backbone.View
     <button class="hit-button">Hit</button>
     <button class="stand-button">Stand</button>
     <%= button %>
-    <div class = "betSize">Bet Size: <%=betSize%></div>
+    <div class = "betSize">Bet Size: $<%=betSize%></div>
     <div class="player-hand-container"></div>
     <div class="dealer-hand-container"></div>
   '
@@ -37,6 +37,25 @@ class window.GameView extends Backbone.View
     @listenTo @model, 'change:status', @render
     @listenTo @model, 'change:chips', -> if window.localStorage then window.localStorage[@model.get 'name'] = JSON.stringify @model.get 'chips'
     @$el.on 'click', '.newGame', => @model.newGame()
+    keyDown = [false, false, false] # space is 32, h is 72, s is 83
+    $(document).keyup (evt) =>
+      if evt.keyCode is 32 and not keyDown[0] and @model.get('status') in ['win', 'lose', 'draw']
+        @model.newGame()
+        evt.preventDefault()
+        keyDown[0] = true
+      if evt.keyCode is 72 and not keyDown[1]
+        @model.playerHit()
+        keyDown[1] = true
+      if evt.keyCode is 83 and not keyDown[2]
+        @model.playerStand()
+        keyDown[2] = true
+    $(document).keydown (evt) ->
+      if evt.keyCode is 32
+        keyDown[0] = false
+      if evt.keyCode is 72
+        keyDown[1] = false
+      if evt.keyCode is 83
+        keyDown[2] = false
     @options.color = @neutral()
     @model.newGame()
     @render()
